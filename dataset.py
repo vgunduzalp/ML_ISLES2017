@@ -241,8 +241,15 @@ class ISLESDataset(ScanDataset):
     def load_data(self, folders):
         data_list = []
         label_list = []
+        i = 0
         for folder in folders:
-            print('loading %s' % folder)
+            
+            # TODO: remove
+            i = i+1
+            if(i>2):
+                break
+
+            print(i,'-loading %s' % folder)
             data = LoadOnePersonNii(folder)
             data, label = StackData(data)
             #mode = Mode(data, factor=[16,4,4,4,4,1])

@@ -11,7 +11,6 @@ from solver import Solver, SegLoss
 
 from vox_resnet import VoxResNet_V0, VoxResNet_V1
 from refine_net import RefineNet
-from dense_net import DenseNet
 from dataset import ISLESDataset
 from evaluator import EvalDiceScore, EvalSensitivity, EvalPrecision
 
@@ -49,14 +48,14 @@ def Evaluate(net, dataset, data_name):
     return eval_dict
 
 def Train(train_data, val_data, net, num_epoch, lr, output_dir):
-    net = torch.nn.DataParallel(net, device_ids=[0, 1])
+    net = torch.nn.DataParallel(net, device_ids=[0])
     solver = Solver(net, train_data, 0.0001, output_dir)
     solver.criterion = lambda p,t: SegLoss(p, t, num_classes=2, loss_fn=DiceLoss)
     solver.iter_per_sample = 100
     for i_epoch in range(0, num_epoch, solver.iter_per_sample):
         # train
         solver.dataset.set_trans_prob(i_epoch/1000.0+0.15)
-        loss = solver.step_one_epoch(batch_size=40, iter_size=1)
+        loss = solver.step_one_epoch(batch_size=2, iter_size=1)
         i_epoch = solver.num_epoch
         print(('epoch:%d, loss:%f')  % (i_epoch, loss))
 
@@ -101,7 +100,7 @@ def GetDataset(fold, num_fold, need_train=True, need_val=True):
     return train_dataset, val_dataset
 
 if __name__ == '__main__':
-    fold = int(sys.argv[1])
+    fold = 1#int(sys.argv[1])
     train_dataset, val_dataset = GetDataset(fold, num_fold=6)
     print('number of training %d' % len(train_dataset))
     if val_dataset is not None:
@@ -119,4 +118,4 @@ if __name__ == '__main__':
     except:
         pass
     Train(train_dataset, val_dataset, net,
-        num_epoch=2000, lr=0.0001, output_dir=output_dir)
+        num_epoch=10, lr=0.0001, output_dir=output_dir)

@@ -42,21 +42,30 @@ class Solver(object):
         self.iter_per_sample = 1
 
     def step_one_epoch(self, batch_size, iter_size=1):
+        print("step_one_epoch => batch_size :",batch_size)
         self.net.cuda()
         self.net.train()
         self.dataset.train()
         self.dataset.set_iter_per_sample(self.iter_per_sample)
         batch_data = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, 
-                num_workers=batch_size/2, collate_fn=CollateFn(), pin_memory=True)
-        for i_batch, (volume, target) in enumerate(batch_data):
+                num_workers=batch_size//2, collate_fn=CollateFn(), pin_memory=True)
+        d1 = enumerate(batch_data)
+        print("data:sayisi",len(batch_data))
+        for i_batch, (volume, target) in d1:
+            
             self.num_iter += 1
             volume = Variable(volume).cuda()
             target = Variable(target).cuda()
             # forward
             predict = self.net(volume)
+            
             loss = self.criterion(predict, target)
+            #print("------------------------------")
             self.writer.add_scalar('loss', loss.item(), self.num_iter)
-            print('epoch: %d, batch %d: %0.5f' % (self.num_epoch, i_batch, loss.data[0]))
+            #print("step_one_epoch2",self.num_epoch)
+            #print("step_one_epoch1",loss.data[0])
+            print('epoch: %d, batch %d: %0.5f' % (self.num_epoch, i_batch, loss.data))
+            #print("------------------------------")
             # backward
             loss.backward()
             if i_batch % iter_size == 0:

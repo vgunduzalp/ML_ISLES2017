@@ -2,7 +2,7 @@
 *.pt
 *.zip
 data/isles/
-
+output/
 
 
 # Created by https://www.gitignore.io/api/python
